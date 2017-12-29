@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Refactor2.ViewModel
 {
-    class MainViewModel
+    public class MainViewModel
     {
-        public NewsManager _newsManager;
+        public readonly NewsManager _newsManager;
 
         public MainViewModel(NewsManager newsManager)
         {

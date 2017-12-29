@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Refactor2.Service.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,15 +15,18 @@ namespace Refactor2.Service
         private HttpClient _client;
         private ILoadingProgressor _loadingProgressor;
         private INetworkDetector _networkDetector;
+        private IParser _parser;
 
+        protected IParser Parser { get { return _parser; } }
         protected HttpClient Client { get { return _client; } }
 
-        public BaseServiceManager(string baseUrl, ILoadingProgressor loadingProgressor, INetworkDetector networkDetector)
+        public BaseServiceManager(string baseUrl, ILoadingProgressor loadingProgressor, INetworkDetector networkDetector, IParser parser)
         {
             _client = new HttpClient(new ModernHttpClient.NativeMessageHandler());
             _baseUrl = baseUrl;
             _loadingProgressor = loadingProgressor;
             _networkDetector = networkDetector;
+            _parser = parser;
         }
 
         public async Task<HttpResponseMessage> InvokeService(HttpMethod method, string methodUrl, object bodyObject = null)
@@ -56,8 +60,15 @@ namespace Refactor2.Service
 
         private HttpContent CreateRequestBodyContent(object bodyObject)
         {
-            var bodyString = JsonConvert.SerializeObject(bodyObject);
-            return new StringContent(bodyString, Encoding.UTF8, "application/json");
+            var bodyString = _parser.Serialize(bodyObject);
+            return new StringContent(bodyString.ToString(), Encoding.UTF8, "application/json");
+        }
+
+        protected async Task<T> Dererialize<T>(HttpContent content)
+        {
+            var responseBody = await content.ReadAsStringAsync();
+            var responseObject = _parser.Deserialize<T>(responseBody);
+            return responseObject;
         }
     }
 }

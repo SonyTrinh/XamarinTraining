@@ -64,8 +64,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApiConstant.cs" />
     <Compile Include="Implementation\AppLoadingProgressor.cs" />
     <Compile Include="Implementation\AppNetworkDetector.cs" />
+    <Compile Include="JsonParser.cs" />
+    <Compile Include="Manager\BaseManager.cs" />
     <Compile Include="Manager\NewsManager.cs" />
     <Compile Include="Manager\UserManager.cs" />
     <Compile Include="Model\News.cs" />
@@ -76,6 +79,7 @@
     <Compile Include="Service\BaseServiceManager.cs" />
     <Compile Include="Service\Interface\ILoadingProgressor.cs" />
     <Compile Include="Service\Interface\INetworkDetector.cs" />
+    <Compile Include="Service\Interface\IParser.cs" />
     <Compile Include="Service\Interface\IServiceManager.cs" />
     <Compile Include="Service\Request\AuthenticationRequest.cs" />
     <Compile Include="Service\Response\NewsResponse.cs" />

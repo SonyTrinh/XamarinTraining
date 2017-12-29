@@ -3,6 +3,7 @@ using Microsoft.Practices.ServiceLocation;
 using Refactor2.Implementation;
 using Refactor2.Manager;
 using Refactor2.Service;
+using Refactor2.Service.Interface;
 using Refactor2.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -33,26 +34,34 @@ namespace Refactor2
 
             private void Register()
             {
-                var serviceManager = new ApplicationServiceManager("https://ft-ductuu138.oraclecloud2.dreamfactory.com/", new AppLoadingProgressor(), new AppNetworkDetector());
+                var serviceManager = new ApplicationServiceManager(ApiConstant.ApiUrl, new AppLoadingProgressor(), new AppNetworkDetector(), new JsonParser());
 
                 ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
                 SimpleIoc.Default.Register<IServiceManager>(() => serviceManager);
+
+                SimpleIoc.Default.Register<IParser, JsonParser>();
+                SimpleIoc.Default.Register<ILoadingProgressor, AppLoadingProgressor>();
+                SimpleIoc.Default.Register<INetworkDetector, AppNetworkDetector>();
+                SimpleIoc.Default.Register<NewsManager>();
+                SimpleIoc.Default.Register<UserManager>();
+                SimpleIoc.Default.Register<MainViewModel>();
+                SimpleIoc.Default.Register<LoginViewModel>();
             }
         }
 
-        public class LoginForm
+        public class LoginForm : BaseForm
         {
-            public async void Show()
+            public override async void Show()
             {
                 Console.WriteLine("Login Form Showed");
-                var userManager = new UserManager();
-                var viewModel = new LoginViewModel(userManager);
+                var viewModel = ServiceLocator.Current.GetInstance<LoginViewModel>();
                 Console.WriteLine("Input to Login");
                 Console.Write("Email:");
                 viewModel.Email = Console.ReadLine();
                 Console.Write("Password:");
                 viewModel.Password = Console.ReadLine();
-                await viewModel.Login(HandleLoginSuccess);
+                if (await viewModel.Login())
+                    HandleLoginSuccess();
             }
 
             private void HandleLoginSuccess()
@@ -62,13 +71,21 @@ namespace Refactor2
             }
         }
 
-        public class MainForm
+        public class MainForm : BaseForm
         {
-            public async void Show()
+            public override async void Show()
             {
-                Console.WriteLine("Main Form Showed");
-                var mainViewModel = new MainViewModel(new NewsManager());
+                base.Show();
+                var mainViewModel = ServiceLocator.Current.GetInstance<MainViewModel>();
                 await mainViewModel.GetNews();
+            }
+        }
+
+        public class BaseForm //ViewModel??
+        {
+            public virtual void Show()
+            {
+                Console.WriteLine(this.GetType().Name + " Showed");
             }
         }
     }
